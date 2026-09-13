@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jamurin — Admin Dashboard</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#F6F0E4;color:#3E2718;font-family:Arial,sans-serif}.wrap{width:min(1100px,calc(100% - 28px));margin:auto;padding:35px 0 55px}.card{background:#fffdf8;border:1px solid rgba(91,58,41,.12);border-radius:20px;box-shadow:0 10px 30px rgba(62,39,24,.07)}#login{width:min(430px,100%);margin:7vh auto 0;padding:30px;text-align:center}.logo{width:64px;height:64px;margin:0 auto 12px;border-radius:18px;background:#D9C9A8;display:grid;place-items:center;font-size:30px}.kicker{font-size:11px;letter-spacing:.2em;font-weight:800;color:#6B8F4E}.title{font-size:30px;margin:5px 0}.sub{font-size:13px;color:#6d625a;margin:7px 0 22px}.field{text-align:left;margin-bottom:12px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.field input{width:100%;padding:12px;border:1px solid #D9C9A8;border-radius:11px;background:#F6F0E4;outline:none}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:800;cursor:pointer}.primary{width:100%;background:#2E4A2F;color:white}.secondary{background:#fffdf8;color:#5B3A29;border:1px solid #D9C9A8}.msg{min-height:18px;color:#B23A2B;font-size:12px;font-weight:700}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}.actions{display:flex;gap:8px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}.stat{padding:19px}.stat small{display:block;color:#6d625a;margin-bottom:5px}.stat strong{font-size:23px;color:#2E4A2F}.orders{padding:20px}.orders h2{font-size:19px;margin:0 0 12px;padding-bottom:12px;border-bottom:1px solid #D9C9A8}.order{padding:14px 0;border-bottom:1px solid rgba(217,201,168,.7)}.order:last-child{border-bottom:0}.row{display:flex;justify-content:space-between;gap:12px}.muted{font-size:12px;color:#766b63}.customer{font-weight:700;margin-top:5px}.items{font-size:12px;line-height:1.5;margin:4px 0 8px}.total{font-weight:800;color:#2E4A2F}.empty{text-align:center;padding:25px;color:#766b63;font-size:13px}.note{margin-top:12px;font-size:12px;color:#766b63}.hidden{display:none!important}@media(max-width:700px){.top{flex-direction:column}.actions{width:100%}.actions .btn{flex:1}.stats{grid-template-columns:1fr}.wrap{padding-top:20px}.title{font-size:26px}.orders{padding:15px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section id="login" class="card">
+    <div class="logo">🍄</div><span class="kicker">JAMURIN</span><h1 class="title">Admin Dashboard</h1>
+    <p class="sub">Masuk untuk melihat pesanan Jamurin.</p>
+    <div class="field"><label>Password Admin</label><input id="password" type="password" autocomplete="current-password" placeholder="Masukkan password"></div>
+    <p id="loginMsg" class="msg"></p><button id="loginBtn" class="btn primary">Masuk Dashboard</button>
+  </section>
+
+  <section id="dash" class="hidden">
+    <div class="top"><div><span class="kicker">JAMURIN</span><h1 class="title">Dashboard Penjualan</h1><p class="sub">Data diambil langsung dari Google Sheet.</p></div><div class="actions"><button id="refresh" class="btn secondary">↻ Refresh</button><button id="logout" class="btn secondary">Keluar</button></div></div>
+    <div class="stats"><div class="stat card"><small>Total Pesanan</small><strong id="orders">0</strong></div><div class="stat card"><small>Total Nilai Pesanan</small><strong id="income">Rp 0</strong></div><div class="stat card"><small>Rata-rata Pesanan</small><strong id="avg">Rp 0</strong></div></div>
+    <div class="orders card"><h2>Detail Pesanan</h2><div id="list"><div class="empty">Memuat data...</div></div></div>
+    <p class="note">Catatan: “Total Nilai Pesanan” adalah nilai order yang tercatat, bukan bukti pembayaran sudah diterima.</p>
+  </section>
+</div>
+<script>
+let token = sessionStorage.getItem('jamurinAdminToken') || '';
+const $=id=>document.getElementById(id);
+const rupiah=v=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(v)||0);
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
+function call(name,...args){return new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name](...args))}
+async function login(){ $('loginMsg').textContent='Memeriksa...'; $('loginBtn').disabled=true; try{const r=await call('adminLogin',$('password').value); if(!r.ok) throw new Error(r.message||'Password salah'); token=r.token;sessionStorage.setItem('jamurinAdminToken',token);showDash();}catch(e){$('loginMsg').textContent=e.message||'Gagal login.'}finally{$('loginBtn').disabled=false}}
+async function load(){ $('list').innerHTML='<div class="empty">Memuat data...</div>'; try{const r=await call('getAdminOrders',token);if(!r.ok){logout();return}render(r.orders||[])}catch(e){$('list').innerHTML='<div class="empty">Gagal mengambil data.</div>'}}
+function render(orders){const total=orders.reduce((s,o)=>s+Number(o.total||0),0);$('orders').textContent=orders.length;$('income').textContent=rupiah(total);$('avg').textContent=rupiah(orders.length?Math.round(total/orders.length):0);if(!orders.length){$('list').innerHTML='<div class="empty">Belum ada pesanan.</div>';return}$('list').innerHTML=[...orders].reverse().map((o,i)=>{const items=(o.items||[]).map(x=>`${esc(x.name)} × ${Number(x.qty||0)}`).join(', ');return `<article class="order"><div class="row"><strong>Pesanan #${orders.length-i}</strong><span class="muted">${esc(o.date)}</span></div><div class="customer">${esc(o.name||'-')}</div><div class="items">${items||'-'}</div><div class="row"><span class="muted">${Number(o.totalItems||0)} pcs</span><span class="total">${rupiah(o.total)}</span></div></article>`}).join('')}
+function showDash(){$('login').classList.add('hidden');$('dash').classList.remove('hidden');load()}
+function logout(){token='';sessionStorage.removeItem('jamurinAdminToken');$('dash').classList.add('hidden');$('login').classList.remove('hidden');$('password').value='';$('loginMsg').textContent=''}
+$('loginBtn').onclick=login;$('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});$('refresh').onclick=load;$('logout').onclick=logout;
+if(token)showDash();
+</script>
+</body></html>
