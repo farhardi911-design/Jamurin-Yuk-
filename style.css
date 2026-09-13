@@ -280,7 +280,7 @@ html { scroll-padding-top: 85px; }
     }
     .cart-summary {
         flex: 0 1 auto;
-        max-height: 58vh;
+        max-height: 70vh;
         padding: 12px 15px calc(14px + env(safe-area-inset-bottom));
         border-top: 1px solid #D9C9A8;
     }
