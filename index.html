@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jamurin – Jamur Enak, Hidup Lebih Nikmat!</title>
+    <link rel="icon" type="image/png" href="assets/logo-mark.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brown: { DEFAULT: '#5B3A29', dark: '#3E2718', light: '#7A5038' },
+                        cream: { DEFAULT: '#D9C9A8', light: '#F6F0E4', dark: '#C7B48A' },
+                        sage: { DEFAULT: '#6B8F4E', dark: '#2E4A2F', light: '#8CA96E' },
+                    },
+                    fontFamily: {
+                        display: ['"Baloo 2"', 'cursive'],
+                        body: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="antialiased font-body">
+
+    <script src="sections/navbar.js"></script>
+    <script src="sections/hero.js"></script>
+    <script src="sections/products.js"></script>
+    <script src="sections/about.js"></script>
+    <script src="sections/cta.js"></script>
+    <script src="sections/footer.js"></script>
+
+    <!-- Keranjang Jamurin: tersembunyi sampai tombol ditekan -->
+    <button id="cart-fab" class="cart-fab" type="button" aria-label="Buka keranjang">
+        <i class="fas fa-shopping-bag"></i>
+        <span id="cart-count" class="cart-count">0</span>
+    </button>
+
+    <div id="cart-overlay" class="cart-overlay" aria-hidden="true"></div>
+
+    <aside id="cart-panel" class="cart-panel" aria-hidden="true" aria-label="Keranjang belanja">
+        <div class="cart-header">
+            <div>
+                <span class="cart-kicker">JAMURIN</span>
+                <h2>Keranjang Kamu</h2>
+            </div>
+            <button id="cart-close" class="cart-close" type="button" aria-label="Tutup keranjang">&times;</button>
+        </div>
+
+        <div class="order-detail-title">
+            <i class="fas fa-receipt"></i> Detail Pesanan
+        </div>
+        <div id="cart-items" class="cart-items">
+            <div class="cart-empty">
+                <i class="fas fa-basket-shopping"></i>
+                <h3>Keranjang masih kosong</h3>
+                <p>Yuk pilih jamur krispi favoritmu.</p>
+            </div>
+        </div>
+
+        <div class="cart-summary">
+            <div class="promo-box">
+                <div class="promo-title"><i class="fas fa-ticket-alt"></i> Kode promo <span class="optional-label">(opsional)</span></div>
+                <div class="promo-input-row">
+                    <input id="promo-code" type="text" placeholder="Masukkan kode promo (opsional)" maxlength="20" autocomplete="off">
+                    <button id="apply-promo" type="button">Pakai</button>
+                </div>
+                <p id="promo-message" class="promo-message"></p>
+            </div>
+
+            <div class="cart-total-row">
+                <span>Subtotal</span>
+                <strong id="cart-subtotal">Rp 0</strong>
+            </div>
+            <div class="cart-total-row promo-discount-row">
+                <span>Diskon <span id="promo-applied"></span></span>
+                <strong id="cart-discount">- Rp 0</strong>
+            </div>
+            <div class="cart-total-row">
+                <span>Ongkir</span>
+                <strong id="cart-shipping">Rp 10.000</strong>
+            </div>
+            <div class="cart-total-row grand-total-row">
+                <span>Total Bayar</span>
+                <strong id="cart-total">Rp 0</strong>
+            </div>
+
+            <div class="checkout-form">
+                <label for="customer-name">Nama</label>
+                <input id="customer-name" type="text" placeholder="Nama pembeli">
+
+                <label for="customer-address">Alamat</label>
+                <textarea id="customer-address" rows="2" placeholder="Alamat pengantaran"></textarea>
+
+                <label for="customer-email">Email</label>
+                <input id="customer-email" type="email" placeholder="email@contoh.com" autocomplete="email">
+
+                <label for="customer-note">Catatan</label>
+                <textarea id="customer-note" rows="2" placeholder="Contoh: level pedas, waktu kirim, dll."></textarea>
+            </div>
+
+            <button id="checkout-wa" class="checkout-wa" type="button">
+                <i class="fab fa-whatsapp"></i> Checkout via WhatsApp
+            </button>
+        </div>
+    </aside>
+
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
